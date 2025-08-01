@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS packets;
+DROP TABLE IF EXISTS alerts;
+DROP TABLE IF EXISTS host_stats;

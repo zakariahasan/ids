@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Network Alert Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+/* ===== Base Styling ===== */
+      body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 2rem;
+          color: #222;
+          background-color: #f4f4f4;
+      }
+
+
+footer p {
+  margin: 0;
+}
+
+/* ===== Navigation ===== */
+      header {
+          background-color: #2c2c2c;
+          padding: 1rem 2rem;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+      }
+
+          header img {
+              height: 60px;
+              vertical-align: middle;
+          }
+
+          header h1 {
+              margin-left: 1rem;
+              font-size: 1.5rem;
+          }
+
+      nav.main-nav ul {
+          list-style: none;
+          display: flex;
+          gap: 1.5rem;
+          margin: 0;
+          padding: 0;
+      }
+
+          nav.main-nav ul li {
+              display: inline;
+          }
+
+      nav.main-nav a {
+          color: #fff;
+          text-decoration: none;
+          font-weight: bold;
+      }
+
+          nav.main-nav a:hover {
+              text-decoration: underline;
+          }
+
+/* ===== Theme Toggle Button ===== */
+.theme-toggle-container {
+  text-align: right;
+  margin: 0.5rem 1rem;
+}
+
+.theme-toggle-btn {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.theme-toggle-btn:hover {
+  background-color: #555;
+}
+
+/* ===== Dashboard Layout ===== */
+.dashboard-main {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.dashboard-intro h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: #004466;
+}
+
+.dashboard-intro p {
+  font-size: 1.05rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+/* ===== Summary Cards ===== */
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: stretch;
+}
+
+.summary-card {
+  background-color: #0077cc;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auto-refresh-card {
+  background-color: #007bff; /* modern blue */
+  color: white;
+  padding: 0.75rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.auto-refresh-card:hover {
+  background-color: #0056b3;
+}
+
+.auto-refresh-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+/* ===== Chart Grid ===== */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.chart-box {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.chart-box:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Burst Section & Table ===== */
+.burst-section {
+  margin-top: 3rem;
+}
+
+.burst-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #004466;
+}
+
+.burst-table-container {
+  overflow-x: auto;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.styled-table thead {
+  background-color: #0077cc;
+  color: #fff;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f5faff;
+}
+
+/* ===== Action Buttons ===== */
+.download-btn {
+  margin: 1rem 1rem 1rem 0;
+  background-color: #0077cc;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.download-btn:hover {
+  background-color: #005fa3;
+}
+
+/* ===== Dark Mode ===== */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode header,
+body.dark-mode footer {
+  background-color: #1f1f1f;
+  color: #fff;
+}
+
+body.dark-mode .chart-box,
+body.dark-mode .summary-card,
+body.dark-mode .burst-table-container,
+body.dark-mode .styled-table,
+body.dark-mode .dashboard-intro,
+body.dark-mode .burst-section {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  box-shadow: none;
+}
+
+body.dark-mode .styled-table thead {
+  background-color: #2c3e50;
+}
+
+body.dark-mode .styled-table tbody tr:hover {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .download-btn,
+body.dark-mode .auto-refresh-btn,
+body.dark-mode .theme-toggle-btn {
+  background-color: #0077cc;
+  color: white;
+}
+
+body.dark-mode .download-btn:hover,
+body.dark-mode .auto-refresh-btn:hover,
+body.dark-mode .theme-toggle-btn:hover {
+  background-color: #005fa3;
+}
+
+  </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <img src="{{ url_for('static', filename='logo.webp') }}" alt="KOI Logo" style="height: 60px; vertical-align: middle;">
+            <h1>Next Gen-IDS</h1>
+        </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('home.index') }}">🏠 Home</a></li>
+                    <li><a href="{{ url_for('dashboard.view') }}">📊 Analytics Dashboard</a></li>
+                    <li><a href="{{ url_for('train.train_model') }}">🤖 Train AI Model</a></li>
+
+                    {# show admin link only to admins #}
+                    {% if g.user is not none and g.user.role == 'admin' %}
+                    <li><a href="{{ url_for('admin.user_mgmt') }}">🧑‍💼 Admin Panel</a></li>
+                    {% endif %}
+
+                    <li><a href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+                </ul>
+            </nav>
+            <div class="theme-toggle-container">
+                <button id="toggleTheme" onclick="toggleTheme()" class="theme-toggle-btn">🌙 Enable Dark Mode</button>
+            </div>
+    </header>
+
+  <main class="dashboard-main">
+    <section class="dashboard-intro">
+      <h2>📊 Real-Time Network Alerts</h2>
+      <p>This dashboard provides real-time insights into network activities including port scans, DDoS attempts, and burst scans.</p>
+
+<div class="summary-cards">
+  <div class="summary-card" id="summaryPortScan">🔍 Port Scans: <span>0</span></div>
+  <div class="summary-card" id="summaryDDoS">🛡️ DDoS Alerts: <span>0</span></div>
+  <div class="summary-card auto-refresh-card">
+    <button onclick="toggleAutoRefresh()" class="auto-refresh-btn">
+      🔄 Auto Refresh: <span id="autoRefreshState">Off</span>
+    </button>
+  </div>
+</div>
+    </section>
+
+    <section class="chart-grid">
+      <div class="chart-box"><canvas id="hourlyChart"></canvas></div>
+      <div class="chart-box"><canvas id="topAttackers"></canvas></div>
+      <div class="chart-box"><canvas id="ddosWindow"></canvas></div>
+      </section>
+
+    <section class="burst-section">
+      <h2>🛡️ Port-Scan Burst Episodes</h2>
+      <div>
+        <button onclick="downloadCSV()" class="download-btn">⬇️ Download Table CSV</button>
+        <button onclick="downloadCharts()" class="download-btn">🖼️ Download All Charts</button>
+      </div>
+      <div class="burst-table-container">
+        <table id="burstTable" class="styled-table">
+          <thead>
+            <tr>
+              <th>Source IP</th>
+              <th>Burst Start</th>
+              <th>Burst End</th>
+              <th>Scans in Burst</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>&copy; 2025 Next Gen-IDS. All rights reserved.</p></footer>
+
+  <script>
+    let autoRefresh = false;
+    let refreshInterval = null;
+
+    function toggleAutoRefresh() {
+      autoRefresh = !autoRefresh;
+      document.getElementById("autoRefreshState").innerText = autoRefresh ? "On" : "Off";
+      if (autoRefresh) {
+        refreshInterval = setInterval(draw, 10000);
+      } else {
+        clearInterval(refreshInterval);
+      }
+    }
+
+    function downloadCSV() {
+      const rows = [["Source IP", "Burst Start", "Burst End", "Scans in Burst"]];
+      document.querySelectorAll("#burstTable tbody tr").forEach(tr => {
+        const cells = Array.from(tr.children).map(td => td.textContent);
+        rows.push(cells);
+      });
+      const csv = rows.map(r => r.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "burst_data.csv";
+      link.click();
+    }
+
+    function downloadCharts() {
+      document.querySelectorAll("canvas").forEach((canvas, i) => {
+        const link = document.createElement("a");
+        link.download = `chart_${i + 1}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+
+    async function loadJSON(url) {
+      const r = await fetch(url);
+      return r.json();
+    }
+
+    async function draw() {
+      const hourly        = await loadJSON('/api/dashboard/alerts_by_hour');
+      const top           = await loadJSON('/api/dashboard/top_sources');
+      const ddos          = await loadJSON('/api/dashboard/ddos_last_10m');
+      const bursts        = await loadJSON('/api/dashboard/scan_bursts');
+      const hours = Object.keys(hourly).sort();
+      const synData = hours.map(h => hourly[h]['SYN'] || 0);
+      new Chart(document.getElementById('hourlyChart'), {
+  type: 'bar',
+  data: { labels: hours, datasets: [
+    { label: 'SYN Alerts', data: synData }
+  ]},
+  options: { plugins: { title: { display: true, text: 'Hourly Alerts (last 24 h)' } },
+  scales: {
+    y: {
+      beginAtZero: true,
+      suggestedMax: 10
+    }
+  } }
+});
+
+      new Chart(document.getElementById('topAttackers'), {
+        type: 'pie',
+        data: {
+          labels: top.map(r => r.src_ip), datasets: [{ data: top.map(r => r.total_alerts) }]
+        },
+        options: { plugins: { title: { display: true, text: 'Top 10 Source IPs' } },
+  scales: {
+    y: {
+      beginAtZero: true,
+      suggestedMax: 10
+    }
+  } }
+      });
+
+      const ddosLabels = ddos.map(r => new Date(r.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
+const ddosVals = ddos.map(r => r.count);
+      new Chart(document.getElementById('ddosWindow'), {
+        type: 'line',
+        data: { labels: ddosLabels, datasets: [{ label: 'DDoS (10-min window)', data: ddosVals, fill: false }] },
+        options: { plugins: { title: { display: true, text: 'Rolling 10-Minute DDoS Count' } },
+  scales: {
+    y: {
+      beginAtZero: true,
+      suggestedMax: 10
+    }
+  } }
+      });
+
+      const tbody = document.querySelector('#burstTable tbody');
+      tbody.innerHTML = '';
+      bursts.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${b.src_ip}</td><td>${b.burst_start}</td><td>${b.burst_end}</td><td>${b.scans_in_burst}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      updateSummary(hourly, pkt_per_hour);
+    }
+
+    function updateSummary(hourly, pkt_per_hour) {
+      const synTotal = Object.values(hourly).reduce((sum, h) => sum + (h["SYN"] || 0), 0);
+      const ddosTotal = Object.values(hourly).reduce((sum, h) => sum + (h["DDoS"] || 0), 0);
+      document.querySelector("#summaryPortScan span").innerText = synTotal;
+      document.querySelector("#summaryDDoS span").innerText = ddosTotal;
+      }
+
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark-mode");
+      document.getElementById("toggleTheme").textContent = isDark ? "☀️ Enable Light Mode" : "🌙 Enable Dark Mode";
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+
+    (function applySavedTheme() {
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("toggleTheme").textContent = "☀️ Enable Light Mode";
+      }
+    })();
+
+    draw();
+  </script>
+</body>
+</html>

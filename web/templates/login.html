@@ -1,0 +1,32 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Next Gen-IDS - Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<main>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <img src="{{ url_for('static', filename='logo.webp') }}" alt="KOI Logo" class="login-logo">
+      <h2>Sign in to your KOI IDS account</h2>
+      <form method="post" class="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required>
+        </div>
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+</main>
+    <footer>
+    <p>&copy; 2025 Next Gen-IDS. All rights reserved.</p>
+  </footer>
+</html>

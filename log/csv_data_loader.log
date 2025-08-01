@@ -1,0 +1,14 @@
+2025-07-31 23:51:51,133 - INFO - Starting data-load process. Directory: 'C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data'
+2025-07-31 23:51:51,213 - INFO - Successfully connected to PostgreSQL via DSN.
+2025-07-31 23:51:51,214 - INFO - Processing file: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data\normal_traffic_baseline.csv
+2025-07-31 23:51:51,228 - WARNING - File 'normal_traffic_baseline.csv' header does not match any expected schema. Skipping.
+2025-07-31 23:51:51,228 - INFO - Processing file: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data\synthetic_alerts.csv
+2025-07-31 23:51:51,236 - INFO - Header matches table 'alerts'. Loading rows...
+2025-07-31 23:51:51,364 - INFO - Loaded 1000 rows from 'synthetic_alerts.csv' into 'alerts'.
+2025-07-31 23:51:51,364 - INFO - Processing file: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data\synthetic_host_stats.csv
+2025-07-31 23:51:51,374 - INFO - Header matches table 'host_stats'. Loading rows...
+2025-07-31 23:51:51,411 - INFO - Loaded 240 rows from 'synthetic_host_stats.csv' into 'host_stats'.
+2025-07-31 23:51:51,411 - INFO - Processing file: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data\synthetic_packets.csv
+2025-07-31 23:51:51,421 - INFO - Header matches table 'packets'. Loading rows...
+2025-07-31 23:51:51,538 - INFO - Loaded 1000 rows from 'synthetic_packets.csv' into 'packets'.
+2025-07-31 23:51:51,538 - INFO - Data-load process complete. Connection closed.

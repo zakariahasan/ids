@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  ids:
+    build: .
+    cap_add: [ NET_RAW ]
+    # For Linux hosts you may prefer:
+    # network_mode: host
+    environment:
+      IDS_DB_DSN: postgres://ids:ids@db:5432/net_analysis
+      SQLALCHEMY_DATABASE_URI: postgres://ids:ids@db:5432/net_analysis
+      FLASK_ENV: production
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/ids/ml_models
+    ports:
+      - "5000:5000"
+    depends_on: [ db ]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: net_analysis
+      POSTGRES_USER: ids
+      POSTGRES_PASSWORD: ids
+    volumes:
+      - ids_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ids"]
+      interval: 10s
+      retries: 5
+
+volumes:
+  ids_db_data:

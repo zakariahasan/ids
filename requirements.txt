@@ -1,0 +1,10 @@
+flask==3.1.*
+flask_sqlalchemy
+pyshark
+psycopg2-binary
+scikit-learn
+tensorflow-cpu
+pandas
+numpy
+matplotlib
+joblib

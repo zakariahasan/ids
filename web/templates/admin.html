@@ -1,0 +1,148 @@
+<!-- templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management · Next Gen-IDS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* ===== Navigation ===== */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: #2c2c2c;
+            padding: 1rem 2rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            header img {
+                height: 60px;
+                vertical-align: middle;
+            }
+
+            header h1 {
+                margin-left: 1rem;
+                font-size: 1.5rem;
+            }
+
+        nav.main-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+            nav.main-nav ul li {
+                display: inline;
+            }
+
+        nav.main-nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+            nav.main-nav a:hover {
+                text-decoration: underline;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <img src="{{ url_for('static', filename='logo.webp') }}" alt="KOI Logo">
+            <h1>Next Gen-IDS</h1>
+        </div>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{{ url_for('home.index') }}">🏠 Home</a></li>
+                <li><a href="{{ url_for('dashboard.view') }}">📊 Analytics Dashboard</a></li>
+                <li><a href="{{ url_for('train.train_model') }}">🤖 Train AI Model</a></li>
+
+                {# show admin link only to admins #}
+                {% if g.user is not none and g.user.role == 'admin' %}
+                <li><a href="{{ url_for('admin.user_mgmt') }}">🧑‍💼 Admin Panel</a></li>
+                {% endif %}
+
+                <li><a href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+  <main class="p-6 max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-4">User Management</h2>
+
+    <!-- flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="mb-4">
+          {% for category, message in messages %}
+            <li class="{{ 'text-green-700' if category=='success' else 'text-red-700' }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- add user form -->
+    <section class="form-card bg-gray-50 p-4 rounded shadow mb-8">
+      <h3 class="text-xl font-semibold mb-2">Add User</h3>
+      <form method="post" action="{{ url_for('admin.add_user') }}">
+        <label for="username" class="block font-medium">Username</label>
+        <input id="username" name="username" required class="border rounded p-2 mb-3 w-full">
+
+        <label for="password" class="block font-medium">Password</label>
+        <input id="password" name="password" type="password"
+               required class="border rounded p-2 mb-3 w-full">
+
+        <label for="role" class="block font-medium">Role</label>
+        <select id="role" name="role" required class="border rounded p-2 mb-4 w-full">
+          <option value="" disabled selected>-- Select Role --</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="service account">Service Account</option>
+        </select>
+
+        <button type="submit" class="submit-btn btn">➕ Add User</button>
+      </form>
+    </section>
+
+    <!-- existing users table -->
+    <h3 class="text-xl font-semibold mb-2">Existing Users</h3>
+    <table class="user-table w-full border collapse">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border p-2 text-left">Name</th>
+          <th class="border p-2 text-left">Role</th>
+          <th class="border p-2">Operation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td class="border p-2">{{ user.username }}</td>
+          <td class="border p-2">{{ user.role }}</td>
+          <td class="border p-2 text-center">
+            <a class="delete-btn text-red-600 hover:underline"
+               href="{{ url_for('admin.delete_user', user_id=user.id) }}">🗑️ Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Next Gen-IDS. All rights reserved.</p>
+  </footer>
+</body>
+</html>

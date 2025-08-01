@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Train AI Model</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f9f9f9;
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        select, button {
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .flashes {
+            color: green;
+            font-weight: bold;
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .img-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .img-card {
+            width: 360px;
+            border: 1px solid #ccc;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+            .img-card img {
+                width: 100%;
+                border-radius: 6px;
+            }
+
+            .img-card .meta {
+                margin-top: 0.5rem;
+                font-size: 0.9rem;
+                color: #444;
+            }
+
+            .img-card .download-btn {
+                margin-top: 0.5rem;
+                display: inline-block;
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+            }
+
+                .img-card .download-btn:hover {
+                    background-color: #004fa3;
+                }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #004466;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        header {
+            background-color: #2c2c2c;
+            padding: 1rem 2rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            header img {
+                height: 60px;
+                vertical-align: middle;
+            }
+
+            header h1 {
+                margin-left: 1rem;
+                font-size: 1.5rem;
+            }
+
+        nav.main-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+            nav.main-nav ul li {
+                display: inline;
+            }
+
+        nav.main-nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+            nav.main-nav a:hover {
+                text-decoration: underline;
+            }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center;">
+            <img src="{{ url_for('static', filename='logo.webp') }}" alt="KOI Logo">
+            <h1>Next Gen-IDS</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{{ url_for('home.index') }}">🏠 Home</a></li>
+                <li><a href="{{ url_for('dashboard.view') }}">📊 Analytics Dashboard</a></li>
+                <li><a href="{{ url_for('train.train_model') }}">🤖 Train AI Model</a></li>
+                {% if g.user is not none and g.user.role == 'admin' %}
+                <li><a href="{{ url_for('admin.user_mgmt') }}">🧑‍💼 Admin Panel</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="home-main">
+        <section class="intro-section">
+            <h2>🔒 Empowering Your Network Security</h2>
+            <p>
+                Welcome to <strong>Next Gen-IDS</strong>, your comprehensive solution for monitoring and analyzing network packets.
+                Our platform uses advanced analytics and AI to detect threats, manage vulnerabilities, and maintain network integrity in real time.
+            </p>
+
+            <img src="{{ url_for('static', filename='network_security.jpg') }}" alt="Network Security" class="intro-img">
+        </section>
+
+        <section class="welcome-card">
+            <h3>👋 Welcome, {{ username }} <span class="role-badge">(Role: {{ role }})</span></h3>
+            <p>
+                Use your personalized dashboard to view real-time insights or manage security configurations seamlessly.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Next Gen-IDS. All rights reserved.</p>
+    </footer>
+</body>
+</html>
