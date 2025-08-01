@@ -329,7 +329,37 @@ body.dark-mode .theme-toggle-btn:hover {
     <canvas id="bandwidthChart" height="240"></canvas>
   </section>
   <!-- ──────────────────────────────────────────────────────────────── -->
-  
+  <!-- : Average packet size per host -->
+    <!-- : Heavy outgoing bias -->
+  <section class="card">
+    <h3>Hosts with Heavy Outgoing Bias – last hour</h3>
+    <canvas id="heavyOutgoingChart" height="240"></canvas>
+  </section>
+  <!-- : Heavy outgoing bias -->
+  <!-- NEW: Port fan-out (unique dst ports) -->
+  <section class="card">
+    <h3>High Port Fan-Out – last 2 h</h3>
+    <canvas id="fanoutChart" height="240"></canvas>
+  </section>
+  <!-- NEW: Port fan-out (unique dst ports) -->
+  <section class="card">
+    <h3>Average Packet Size per Host – all-time</h3>
+    <canvas id="pktSizeChart" height="240"></canvas>
+  </section>
+  <!-- NEW: Average packet size per host -->
+  <!-- NEW: New-source spike events -->
+  <section class="card">
+    <h3>New-Source Spikes – last 12 h</h3>
+    <canvas id="srcSpikeChart" height="260"></canvas>
+  </section>
+  <!-- NEW: New-source spike events -->
+  <!-- NEW: Rolling 30-minute packet totals -->
+<!-- Rolling 30-min packet totals (all hosts combined) -->
+<section class="card">
+  <h3>Total Packets / 30 min – past 24 h</h3>
+  <canvas id="rollingPktTotalChart" height="240"></canvas>
+</section>
+   <!-- NEW: Rolling 30-minute packet totals -->
     <section class="burst-section">
       <h2>🛡️ Port-Scan Burst Episodes</h2>
       <div>
@@ -535,6 +565,244 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(console.error);
 });
+/* ─── Chart #2 – average pkt size + total pkts (all-time) ─────────── */
+fetch('/api/dashboard/avg_pkt_size')
+  .then(r => r.json())
+  .then(data => {
+    const labels   = data.map(d => d.host_ip);
+    const avgSize  = data.map(d => d.avg_pkt_size_bytes);
+    const totalPkt = data.map(d => d.total_pkts);
+
+    const ctx = document.getElementById('pktSizeChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Avg Pkt Size (bytes)', data: avgSize,  yAxisID: 'y-size', borderWidth: 1 },
+          { label: 'Total Packets',        data: totalPkt, yAxisID: 'y-pkts', type: 'line',
+            tension: 0.3, fill: false, borderWidth: 2, pointRadius: 3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          'y-size': { position: 'left',  beginAtZero: true,
+                      title:{display:true,text:'Avg Pkt Size (bytes)'} },
+          'y-pkts': { position: 'right', beginAtZero: true, grid:{drawOnChartArea:false},
+                      title:{display:true,text:'Total Packets'} }
+        }
+      }
+    });
+  })
+  .catch(console.error);
+/* ── Chart #3 – heavy outgoing bias (last hour) ───────────────────── */
+fetch('/api/dashboard/heavy_outgoing')
+  .then(r => r.json())
+  .then(data => {
+    const labels   = data.map(d => d.host_ip);
+    const inPkts   = data.map(d => d.in_pkts);
+    const outPkts  = data.map(d => d.out_pkts);
+    const ratio    = data.map(d => d.out_in_ratio);
+
+    new Chart(document.getElementById('heavyOutgoingChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Outgoing Pkts',
+            data:  outPkts,
+            yAxisID: 'y-pkts',
+            backgroundColor: 'rgba(54, 162, 235, 0.65)',    // blue, 65 % opacity
+            borderColor:     'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Incoming Pkts',
+            data:  inPkts,
+            yAxisID: 'y-pkts',
+            backgroundColor: 'rgba(255, 99, 132, 0.55)',    // red, 55 % opacity
+            borderColor:     'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Out/In Ratio',
+            data:  ratio,
+            yAxisID: 'y-ratio',
+            type:  'line',
+            tension: 0.35,
+            fill:   false,
+            borderWidth: 2,
+            pointRadius: 4,
+            borderDash: [4, 3],                             // dotted line
+            borderColor: '#666',
+            pointBackgroundColor: '#666'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx =>
+                ctx.dataset.label === 'Out/In Ratio'
+                  ? `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}×`
+                  : `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} pkts`
+            }
+          },
+          legend: { position: 'top' }
+        },
+        scales: {
+          'y-pkts': {
+            position: 'left',
+            beginAtZero: true,
+            title: { display: true, text: 'Packets' }
+          },
+          'y-ratio': {
+            position: 'right',
+            beginAtZero: true,
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: 'Out/In Ratio' }
+          }
+        }
+      }
+    });
+  })
+  .catch(console.error);
+/* ── Chart #4 – port fan-out (unique dst ports) ────────────────────── */
+fetch('/api/dashboard/port_fanout')
+  .then(r => r.json())
+  .then(data => {
+    const labels = data.map(d => d.host_ip);
+    const ports  = data.map(d => d.unique_dst_ports);
+
+    new Chart(document.getElementById('fanoutChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Unique Destination Ports (last 2 h)',
+          data: ports,
+          backgroundColor: 'rgba(75, 192, 192, 0.65)',
+          borderColor:     'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx =>
+                `${ctx.parsed.y.toLocaleString()} ports`
+            }
+          },
+          legend: { position: 'top' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Unique dst ports' }
+          }
+        }
+      }
+    });
+  })
+  .catch(console.error);
+ /* ── Chart – new-source spikes (last 12 h) ─────────────────────────── */
+fetch('/api/dashboard/new_source_spike')
+  .then(r => r.json())
+  .then(data => {
+    // label = "<host> @ HH:MM"
+    const labels = data.map(d => {
+      const t = new Date(d.interval_start);
+      return `${d.host_ip} @ ${t.getHours().toString().padStart(2,'0')}:${t
+        .getMinutes().toString().padStart(2,'0')}`;
+    });
+    const jumps  = data.map(d => d.new_src_jump);
+
+    new Chart(document.getElementById('srcSpikeChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'New Source IPs vs previous interval',
+          data:  jumps,
+          backgroundColor: 'rgba(255, 159, 64, 0.65)',   // orange
+          borderColor:     'rgba(255, 159, 64, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx =>
+                `${ctx.parsed.y.toLocaleString()} new src IPs`
+            }
+          },
+          legend: { position: 'top' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'New source IPs' }
+          }
+        }
+      }
+    });
+  })
+  .catch(console.error);
+/* ── Chart – total pkts every 30 min (all hosts) ─────────────────── */
+fetch('/api/dashboard/rolling_pkt_30m_total')
+  .then(r => r.json())
+  .then(data => {
+    const labels = data.map(d => {
+		const dt = new Date(d.interval_end);
+		return  `${dt.getDate()} ${dt.toLocaleString('default', { month: 'short' })} ` +
+				`${dt.getHours().toString().padStart(2,'0')}:` +
+				`${dt.getMinutes().toString().padStart(2,'0')}`;
+});
+    const totals = data.map(d => d.total_pkts);
+
+    new Chart(document.getElementById('rollingPktTotalChart'), {
+      type: 'line',
+      data: { 
+        labels,
+        datasets: [{
+          label: 'Total packets in previous 30 min',
+          data: totals,
+          borderColor: '#ff6384',
+          backgroundColor: '#ff6384',
+          fill: false,
+          tension: 0.3,
+          pointRadius: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend:  { display: false },
+          tooltip: { callbacks: {
+            label: ctx => ctx.parsed.y.toLocaleString() + ' pkts'
+          }}
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Packets / 30 min' }
+          }
+        }
+      }
+    });
+  })
+  .catch(console.error); 
+  
     draw();
   </script>
 </body>
