@@ -321,15 +321,7 @@ body.dark-mode .theme-toggle-btn:hover {
       <div class="chart-box"><canvas id="topAttackers"></canvas></div>
       <div class="chart-box"><canvas id="ddosWindow"></canvas></div>
       </section>
-  <!-- ──────────────────────────────────────────────────────────────── -->
-  <!-- NEW: Top bandwidth talkers (bytes + packets)                    -->
-  <!-- ──────────────────────────────────────────────────────────────── -->
-  <section class="card">
-    <h3>Top Bandwidth Talkers – last 10 min</h3>
-    <canvas id="bandwidthChart" height="240"></canvas>
-  </section>
-  <!-- ──────────────────────────────────────────────────────────────── -->
-  
+
     <section class="burst-section">
       <h2>🛡️ Port-Scan Burst Episodes</h2>
       <div>
@@ -477,64 +469,7 @@ const ddosVals = ddos.map(r => r.count);
         document.getElementById("toggleTheme").textContent = "☀️ Enable Light Mode";
       }
     })();
-/**
- * Draw a dual-axis chart:
- *   - Bars  : total bytes in last 10 min
- *   - Line  : packet count in last 10 min
- */
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('/api/dashboard/top_bandwidth')
-    .then(r => r.json())
-    .then(data => {
-      const labels = data.map(d => d.host_ip);
-      const bytes  = data.map(d => d.bytes_last_10m);
-      const pkts   = data.map(d => d.pkts_last_10m);
 
-      const ctx = document.getElementById('bandwidthChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Bytes (last 10 min)',
-              data: bytes,
-              yAxisID: 'y-bytes',
-              borderWidth: 1
-            },
-            {
-              label: 'Packets (last 10 min)',
-              data: pkts,
-              yAxisID: 'y-pkts',
-              type: 'line',
-              tension: 0.3,
-              fill: false,
-              borderWidth: 2,
-              pointRadius: 3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            'y-bytes': {
-              position: 'left',
-              beginAtZero: true,
-              title: { display: true, text: 'Bytes' }
-            },
-            'y-pkts': {
-              position: 'right',
-              beginAtZero: true,
-              grid: { drawOnChartArea: false },   // keep the two axes visually distinct
-              title: { display: true, text: 'Packets' }
-            }
-          }
-        }
-      });
-    })
-    .catch(console.error);
-});
     draw();
   </script>
 </body>

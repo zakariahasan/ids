@@ -1,5 +1,5 @@
 
--- Top “talkers” by bandwidth in the last 10 minutes
+-- Top "talkers" by bandwidth in the last 10 minutes
 -- Shows which hosts moved the most bytes recently.
 SELECT
     host_ip,

@@ -52,3 +52,15 @@ def scan_bursts():
             "scans": r["scans_in_burst"],
         } for r in rows
     ])
+@bp.route("/top_bandwidth")
+def top_bandwidth():
+    """
+    Five hosts that moved the most bytes in the last 10 minutes.
+    Also returns packet counts so the UI can plot both.
+    """
+    rows = run_sql("top_bandwidth_taker.sql")
+    # Make sure JSON is clean ints (SqlAlchemy may return Decimal)
+    for r in rows:
+        r["bytes_last_10m"] = int(r["bytes_last_10m"])
+        r["pkts_last_10m"]  = int(r["pkts_last_10m"])
+    return jsonify(rows)
