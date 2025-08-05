@@ -1,0 +1,4 @@
+python -m ids.scripts.gen_alerts_data
+python -m ids.scripts.gen_host_stats_data
+python -m ids.scripts.gen_packets_data
+python -m ids.scripts.load_csv_files_to_db_tables

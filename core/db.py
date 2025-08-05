@@ -81,7 +81,7 @@ class DatabaseClient:
                 self._ops_since_commit = 0
 
     # ------------------------------------------------------------------ #
-    # Inserts                                                             #
+    # Inserts                                                            #
     # ------------------------------------------------------------------ #
     def insert_packet(self, pkt: Mapping[str, Any]) -> None:
         self._execute(
@@ -121,7 +121,7 @@ class DatabaseClient:
         )
 
     # ------------------------------------------------------------------ #
-    # Utilities                                                           #
+    # Utilities                                                          #
     # ------------------------------------------------------------------ #
     def execute_sql(self, sql: str) -> None:
         """Run arbitrary SQL (DDL or DML) from a string."""
