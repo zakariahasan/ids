@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Train Supervised Model</title>
+<link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    form {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    select, button {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .flashes {
+      color: green;
+      font-weight: bold;
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    .img-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .img-card {
+      width: 360px;
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .img-card img {
+      width: 100%;
+      border-radius: 6px;
+    }
+
+    .img-card .meta {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    .img-card .download-btn {
+      margin-top: 0.5rem;
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .img-card .download-btn:hover {
+      background-color: #004fa3;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #004466;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    header {
+      background-color: #2c2c2c;
+      padding: 1rem 2rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header img {
+      height: 60px;
+      vertical-align: middle;
+    }
+
+    header h1 {
+      margin-left: 1rem;
+      font-size: 1.5rem;
+    }
+
+    nav.main-nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav.main-nav ul li {
+      display: inline;
+    }
+
+    nav.main-nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav.main-nav a:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+<header>
+<div style="display: flex; align-items: center;">
+<img alt="KOI Logo" src="{{ url_for('static', filename='logo.webp') }}"/>
+<h1>Train Supervised Model</h1>
+</div>
+<nav class="main-nav">
+<ul>
+<li><a href="{{ url_for('home.index') }}">🏠 Home</a></li>
+<li><a href="{{ url_for('dashboard.view') }}">📊 Analytics Dashboard</a></li>
+<li><a href="{{ url_for('alerts.alert_dashboard') }}">🤖 Alerts Dashboard </a></li>
+                <li><a href="{{ url_for('train_supervised.train_supervised_model') }}">🤖 Train Suppervised Model</a></li>
+				<li><a href="{{ url_for('train_unsupervised.train_unsupervised_model') }}">🤖 Train Unsuppervised Model</a></li>
+      {% if g.user is not none and g.user.role == 'admin' %}
+        <li><a href="{{ url_for('admin.user_mgmt') }}">🧑‍💼 Admin Panel</a></li>
+      {% endif %}
+      <li><a href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+</ul>
+</nav>
+</header>
+<main>
+<h1>Train Suppervised Model</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+<label for="model_type">Select Model Type:</label>
+<select id="model_type" name="model_type">
+
+
+
+
+
+
+<option value="DecisionTree">DecisionTree</option><option value="RandomForest">RandomForest</option><option value="LinearSVM">LinearSVM</option></select>
+<button type="submit">Train Model</button>
+</form>
+
+  {% if recent_images %}
+    <div class="section-title">📊 Recent Training Results</div>
+<div class="img-grid">
+      {% for img in recent_images %}
+        <div class="img-card">
+<img alt="Training Result" src="{{ url_for('static', filename='training_results/supervised/' ~ img) }}"/>
+<div class="meta">
+            {% set base = img.rsplit('.', 1)[0] %}
+            {% set parts = base.rsplit('_', 1) %}
+            {% if parts|length == 2 %}
+              <strong>Model:</strong> {{ parts[0].replace('_', ' ').title() }}<br/>
+<strong>Timestamp:</strong> {{ parts[1][:4] }}-{{ parts[1][4:6] }}-{{ parts[1][6:8] }} {{ parts[1][9:11] }}:{{ parts[1][11:13] }}:{{ parts[1][13:15] }}
+            {% endif %}
+          </div>
+<a class="download-btn" download="" href="{{ url_for('static', filename='training_results/supervised/' ~ img) }}">⬇️ Download</a>
+</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</main>
+<footer>
+<p>© 2025 Next Gen-IDS. All rights reserved.</p>
+</footer>
+</body>
+</html>

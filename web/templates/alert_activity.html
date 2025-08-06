@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Train AI Model</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f9f9f9;
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        select, button {
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .flashes {
+            color: green;
+            font-weight: bold;
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .img-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .img-card {
+            width: 360px;
+            border: 1px solid #ccc;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+            .img-card img {
+                width: 100%;
+                border-radius: 6px;
+            }
+
+            .img-card .meta {
+                margin-top: 0.5rem;
+                font-size: 0.9rem;
+                color: #444;
+            }
+
+            .img-card .download-btn {
+                margin-top: 0.5rem;
+                display: inline-block;
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+            }
+
+                .img-card .download-btn:hover {
+                    background-color: #004fa3;
+                }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #004466;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        header {
+            background-color: #2c2c2c;
+            padding: 1rem 2rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            header img {
+                height: 60px;
+                vertical-align: middle;
+            }
+
+            header h1 {
+                margin-left: 1rem;
+                font-size: 1.5rem;
+            }
+
+        nav.main-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+            nav.main-nav ul li {
+                display: inline;
+            }
+
+        nav.main-nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+            nav.main-nav a:hover {
+                text-decoration: underline;
+            }
+			
+<!-- ─── put this inside the same <style> block, below the existing rules ─── -->
+/* ========== modern table ========== */
+.table-modern {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 0.75rem;
+  overflow: hidden;               /* rounds header too               */
+  box-shadow: 0 4px 18px rgba(0,0,0,.06);
+}
+
+.table-modern thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(90deg,#007bff 0%,#0056b3 100%);
+  color:#fff;
+  text-transform: uppercase;
+  font-size: .75rem;
+  letter-spacing: .04em;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.table-modern th,
+.table-modern td {
+  padding: .9rem 1rem;
+  text-align:left;
+}
+
+.table-modern tbody tr:nth-child(even)   { background:#f5f7fa; }
+.table-modern tbody tr:hover             { background:#e9f2ff; }
+
+.table-modern .badge {
+  font-size: .72rem;
+  font-weight: 600;
+  background:#17a2b8;
+  padding:.35rem .55rem;
+  border-radius:.375rem;
+}
+
+/* tighten table in small viewports */
+@media (max-width: 600px){
+  .table-modern th, .table-modern td { padding:.65rem .5rem; }
+}
+			
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center;">
+            <img src="{{ url_for('static', filename='logo.webp') }}" alt="KOI Logo">
+            <h1>Next Gen-IDS</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{{ url_for('home.index') }}">🏠 Home</a></li>
+                <li><a href="{{ url_for('dashboard.view') }}">📊 Analytics Dashboard</a></li>
+				<li><a href="{{ url_for('alerts.alert_dashboard') }}">🤖 Alerts Dashboard </a></li>
+                <li><a href="{{ url_for('train_supervised.train_supervised_model') }}">🤖 Train Suppervised Model</a></li>
+				<li><a href="{{ url_for('train_unsupervised.train_unsupervised_model') }}">🤖 Train Unsuppervised Model</a></li>
+                {% if g.user is not none and g.user.role == 'admin' %}
+                <li><a href="{{ url_for('admin.user_mgmt') }}">🧑‍💼 Admin Panel</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="alert-main">
+
+
+  <h1 class="mt-4">Alert Activity</h1>
+
+  <!-- ─────────────────── model selector ─────────────────── -->
+  <form method="post" class="row g-2 align-items-end mb-4">
+    <div class="col-auto">
+      <label class="form-label fw-bold">URL-based models</label>
+      <select name="model_choice" class="form-select">
+        {% for m in url_models %}
+          <option value="{{ m }}" {{ "selected" if m == current_model else "" }}>
+            {{ m }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label fw-bold">Behaviour-based models</label>
+      <select name="model_choice" class="form-select">
+        {% for m in behaviour_models %}
+          <option value="{{ m }}" {{ "selected" if m == current_model else "" }}>
+            {{ m }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">Switch model</button>
+    </div>
+  </form>
+
+  <!-- ─── replace your current <table …> block with this ─── -->
+<div class="table-responsive">
+  <table class="table-modern">
+    <thead>
+      <tr>
+        <th>Alert ID</th>
+        <th>Timestamp</th>
+        <th>Type</th>
+        <th>Src IP</th>
+        <th>Dst IP</th>
+        <th>Model</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in alerts %}
+        <tr>
+          <td>{{ a.alert_id }}</td>
+          <td>{{ a.ts }}</td>
+          <td>{{ a.alert_type }}</td>
+          <td>{{ a.src_ip }}</td>
+          <td>{{ a.dst_ip }}</td>
+          <td><span class="badge">{{ a.model_name }}</span></td>
+          <td>{{ a.description }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted">No alerts yet 🎉</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Next Gen-IDS. All rights reserved.</p>
+    </footer>
+</body>
+</html>
