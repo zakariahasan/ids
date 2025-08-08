@@ -76,7 +76,7 @@ class IsolationForestModel(BaseAnomalyModel):
         ax.set_title("Isolation Forest - Anomaly Detection (Training Data)")
         ax.legend()
 
-        outfile = save_dir / f"isolation_forest_3d_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
+        outfile = save_dir / f"isolation_forest_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
         fig.tight_layout()
         fig.savefig(outfile)
         plt.close(fig)

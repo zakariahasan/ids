@@ -1,6 +1,6 @@
 from pathlib import Path
 from ids.core.config import DB_DSN              # supplies the DSN string
-from ids.core.db import DatabaseClient          # your wrapper around psycopg2 / asyncpg
+from ids.core.db import DatabaseClient          # wrapper around psycopg2 / asyncpg
 
 # ---------------------------------------------------------------------------
 # Dynamic project paths

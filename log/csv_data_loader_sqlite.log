@@ -1,0 +1,243 @@
+2025-08-07 20:39:13,194 - INFO - Starting SQLite data\u2011load. Directory: 'C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data'
+2025-08-07 20:39:13,195 - INFO - Connected to SQLite DB: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\net_analysis.db
+2025-08-07 20:39:13,195 - INFO - Processing file: malicious_phish.csv
+2025-08-07 20:39:13,755 - WARNING - File 'malicious_phish.csv' header does not match any table schema. Skipping.
+2025-08-07 20:39:13,755 - INFO - Processing file: normal_traffic_baseline.csv
+2025-08-07 20:39:13,781 - WARNING - File 'normal_traffic_baseline.csv' header does not match any table schema. Skipping.
+2025-08-07 20:39:13,782 - INFO - Processing file: synthetic_alerts.csv
+2025-08-07 20:39:13,812 - WARNING - File 'synthetic_alerts.csv' header does not match any table schema. Skipping.
+2025-08-07 20:39:13,812 - INFO - Processing file: synthetic_alerts2.csv
+2025-08-07 20:39:13,824 - WARNING - File 'synthetic_alerts2.csv' header does not match any table schema. Skipping.
+2025-08-07 20:39:13,824 - INFO - Processing file: synthetic_host_stats.csv
+2025-08-07 20:39:13,833 - INFO - Header matches table 'host_stats'. Inserting rows…
+2025-08-07 20:39:13,836 - ERROR - Error inserting rows from 'synthetic_host_stats.csv': no such table: host_stats
+2025-08-07 20:39:13,836 - INFO - Processing file: synthetic_packets.csv
+2025-08-07 20:39:13,847 - INFO - Header matches table 'packets'. Inserting rows…
+2025-08-07 20:39:13,847 - ERROR - Error inserting rows from 'synthetic_packets.csv': no such table: packets
+2025-08-07 20:39:13,847 - INFO - Processing file: test.csv
+2025-08-07 20:39:13,855 - WARNING - File 'test.csv' header does not match any table schema. Skipping.
+2025-08-07 20:39:13,856 - INFO - SQLite data\u2011load complete. Connection closed.
+2025-08-07 20:48:51,915 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-07 20:48:51,916 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-07 20:48:51,917 - INFO - Reading malicious_phish.csv
+2025-08-07 20:48:52,489 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-07 20:48:52,489 - INFO - Reading normal_traffic_baseline.csv
+2025-08-07 20:48:52,508 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-07 20:48:52,509 - INFO - Reading synthetic_alerts.csv
+2025-08-07 20:48:52,537 - WARNING - Header of synthetic_alerts.csv does not match any table; skipping
+2025-08-07 20:48:52,537 - INFO - Reading synthetic_alerts2.csv
+2025-08-07 20:48:52,541 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-07 20:48:52,541 - INFO - Reading synthetic_host_stats.csv
+2025-08-07 20:48:52,560 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-07 20:48:52,561 - INFO - Reading synthetic_packets.csv
+2025-08-07 20:48:52,607 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-07 20:48:52,607 - INFO - Reading test.csv
+2025-08-07 20:48:52,608 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-07 20:48:52,609 - INFO - CSV loader finished.
+2025-08-07 22:07:11,869 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-07 22:07:11,869 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-07 22:07:11,870 - INFO - Reading malicious_phish.csv
+2025-08-07 22:07:12,380 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-07 22:07:12,380 - INFO - Reading normal_traffic_baseline.csv
+2025-08-07 22:07:12,397 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-07 22:07:12,397 - INFO - Reading synthetic_alerts.csv
+2025-08-07 22:07:13,205 - INFO - Inserted 25088 rows into 'alerts' from synthetic_alerts.csv
+2025-08-07 22:07:13,205 - INFO - Reading synthetic_alerts2.csv
+2025-08-07 22:07:13,208 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-07 22:07:13,208 - INFO - Reading synthetic_host_stats.csv
+2025-08-07 22:07:13,232 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-07 22:07:13,232 - INFO - Reading synthetic_packets.csv
+2025-08-07 22:07:13,290 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-07 22:07:13,290 - INFO - Reading test.csv
+2025-08-07 22:07:13,292 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-07 22:07:13,292 - INFO - CSV loader finished.
+2025-08-07 22:11:29,993 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-07 22:11:29,994 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-07 22:11:29,995 - INFO - Reading malicious_phish.csv
+2025-08-07 22:11:30,495 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-07 22:11:30,495 - INFO - Reading normal_traffic_baseline.csv
+2025-08-07 22:11:30,510 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-07 22:11:30,510 - INFO - Reading synthetic_alerts.csv
+2025-08-07 22:11:30,533 - ERROR - Insertion failed for synthetic_alerts.csv \u2192 alerts: UNIQUE constraint failed: alerts.alert_id
+2025-08-07 22:11:30,535 - INFO - Reading synthetic_alerts2.csv
+2025-08-07 22:11:30,537 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-07 22:11:30,538 - INFO - Reading synthetic_host_stats.csv
+2025-08-07 22:11:30,554 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-07 22:11:30,555 - INFO - Reading synthetic_packets.csv
+2025-08-07 22:11:30,592 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-07 22:11:30,592 - INFO - Reading test.csv
+2025-08-07 22:11:30,593 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-07 22:11:30,593 - INFO - Reading users.csv
+2025-08-07 22:11:30,601 - WARNING - Header of users.csv does not match any table; skipping
+2025-08-07 22:11:30,602 - INFO - CSV loader finished.
+2025-08-07 22:14:25,114 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-07 22:14:25,115 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-07 22:14:25,116 - INFO - Reading malicious_phish.csv
+2025-08-07 22:14:25,648 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-07 22:14:25,649 - INFO - Reading normal_traffic_baseline.csv
+2025-08-07 22:14:25,666 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-07 22:14:25,666 - INFO - Reading synthetic_alerts.csv
+2025-08-07 22:14:25,695 - ERROR - Insertion failed for synthetic_alerts.csv \u2192 alerts: UNIQUE constraint failed: alerts.alert_id
+2025-08-07 22:14:25,695 - INFO - Reading synthetic_alerts2.csv
+2025-08-07 22:14:25,699 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-07 22:14:25,699 - INFO - Reading synthetic_host_stats.csv
+2025-08-07 22:14:25,720 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-07 22:14:25,721 - INFO - Reading synthetic_packets.csv
+2025-08-07 22:14:25,772 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-07 22:14:25,772 - INFO - Reading test.csv
+2025-08-07 22:14:25,773 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-07 22:14:25,774 - INFO - Reading users.csv
+2025-08-07 22:14:25,775 - ERROR - Insertion failed for users.csv \u2192 users: table users has no column named password
+2025-08-07 22:14:25,775 - INFO - CSV loader finished.
+2025-08-07 22:17:45,844 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-07 22:17:45,846 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-07 22:17:45,847 - INFO - Reading malicious_phish.csv
+2025-08-07 22:17:46,382 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-07 22:17:46,383 - INFO - Reading normal_traffic_baseline.csv
+2025-08-07 22:17:46,403 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-07 22:17:46,403 - INFO - Reading synthetic_alerts.csv
+2025-08-07 22:17:46,437 - ERROR - Insertion failed for synthetic_alerts.csv \u2192 alerts: UNIQUE constraint failed: alerts.alert_id
+2025-08-07 22:17:46,437 - INFO - Reading synthetic_alerts2.csv
+2025-08-07 22:17:46,440 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-07 22:17:46,440 - INFO - Reading synthetic_host_stats.csv
+2025-08-07 22:17:46,466 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-07 22:17:46,467 - INFO - Reading synthetic_packets.csv
+2025-08-07 22:17:46,537 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-07 22:17:46,537 - INFO - Reading test.csv
+2025-08-07 22:17:46,538 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-07 22:17:46,538 - INFO - Reading users.csv
+2025-08-07 22:17:46,540 - ERROR - Insertion failed for users.csv \u2192 users: table users has no column named password
+2025-08-07 22:17:46,540 - INFO - CSV loader finished.
+2025-08-07 22:20:26,042 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-07 22:20:26,042 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-07 22:20:26,043 - INFO - Reading malicious_phish.csv
+2025-08-07 22:20:26,527 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-07 22:20:26,527 - INFO - Reading normal_traffic_baseline.csv
+2025-08-07 22:20:26,543 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-07 22:20:26,543 - INFO - Reading synthetic_alerts.csv
+2025-08-07 22:20:27,345 - INFO - Inserted 25088 rows into 'alerts' from synthetic_alerts.csv
+2025-08-07 22:20:27,346 - INFO - Reading synthetic_alerts2.csv
+2025-08-07 22:20:27,349 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-07 22:20:27,349 - INFO - Reading synthetic_host_stats.csv
+2025-08-07 22:20:27,374 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-07 22:20:27,374 - INFO - Reading synthetic_packets.csv
+2025-08-07 22:20:27,442 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-07 22:20:27,442 - INFO - Reading test.csv
+2025-08-07 22:20:27,443 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-07 22:20:27,443 - INFO - Reading users.csv
+2025-08-07 22:20:27,451 - INFO - Inserted 6 rows into 'users' from users.csv
+2025-08-07 22:20:27,453 - INFO - CSV loader finished.
+2025-08-08 11:32:13,532 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-08 11:32:13,534 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-08 11:32:13,535 - INFO - Reading malicious_phish.csv
+2025-08-08 11:32:14,384 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-08 11:32:14,384 - INFO - Reading normal_traffic_baseline.csv
+2025-08-08 11:32:14,414 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-08 11:32:14,416 - INFO - Reading synthetic_alerts.csv
+2025-08-08 11:32:15,602 - INFO - Inserted 25088 rows into 'alerts' from synthetic_alerts.csv
+2025-08-08 11:32:15,602 - INFO - Reading synthetic_alerts2.csv
+2025-08-08 11:32:15,617 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-08 11:32:15,618 - INFO - Reading synthetic_host_stats.csv
+2025-08-08 11:32:15,649 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-08 11:32:15,649 - INFO - Reading synthetic_packets.csv
+2025-08-08 11:32:15,718 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-08 11:32:15,718 - INFO - Reading test.csv
+2025-08-08 11:32:15,732 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-08 11:32:15,732 - INFO - Reading users.csv
+2025-08-08 11:32:15,749 - INFO - Inserted 6 rows into 'users' from users.csv
+2025-08-08 11:32:15,749 - INFO - CSV loader finished.
+2025-08-08 15:58:08,608 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-08 15:58:08,609 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-08 15:58:08,609 - INFO - Reading malicious_phish.csv
+2025-08-08 15:58:09,227 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-08 15:58:09,229 - INFO - Reading normal_traffic_baseline.csv
+2025-08-08 15:58:09,258 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-08 15:58:09,258 - INFO - Reading synthetic_alerts.csv
+2025-08-08 15:58:09,300 - ERROR - Insertion failed for synthetic_alerts.csv \u2192 alerts: UNIQUE constraint failed: alerts.alert_id
+2025-08-08 15:58:09,301 - INFO - Reading synthetic_alerts2.csv
+2025-08-08 15:58:09,312 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-08 15:58:09,312 - INFO - Reading synthetic_host_stats.csv
+2025-08-08 15:58:09,341 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-08 15:58:09,341 - INFO - Reading synthetic_packets.csv
+2025-08-08 15:58:09,385 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-08 15:58:09,385 - INFO - Reading test.csv
+2025-08-08 15:58:09,397 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-08 15:58:09,397 - INFO - Reading users.csv
+2025-08-08 15:58:09,413 - INFO - Inserted 6 rows into 'users' from users.csv
+2025-08-08 15:58:09,413 - INFO - CSV loader finished.
+2025-08-08 18:44:12,587 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-08 18:44:12,596 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-08 18:44:12,597 - INFO - Reading malicious_phish.csv
+2025-08-08 18:44:13,458 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-08 18:44:13,459 - INFO - Reading normal_traffic_baseline.csv
+2025-08-08 18:44:13,484 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-08 18:44:13,484 - INFO - Reading synthetic_alerts.csv
+2025-08-08 18:44:13,497 - WARNING - Header of synthetic_alerts.csv does not match any table; skipping
+2025-08-08 18:44:13,498 - INFO - Reading synthetic_alerts2.csv
+2025-08-08 18:44:13,508 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-08 18:44:13,508 - INFO - Reading synthetic_host_stats.csv
+2025-08-08 18:44:13,541 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-08 18:44:13,541 - INFO - Reading synthetic_packets.csv
+2025-08-08 18:44:13,612 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-08 18:44:13,612 - INFO - Reading test.csv
+2025-08-08 18:44:13,623 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-08 18:44:13,624 - INFO - Reading users.csv
+2025-08-08 18:44:13,634 - ERROR - Insertion failed for users.csv \u2192 users: UNIQUE constraint failed: users.id
+2025-08-08 18:44:13,634 - INFO - CSV loader finished.
+2025-08-08 18:59:12,614 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-08 18:59:12,620 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-08 18:59:12,621 - INFO - Reading malicious_phish.csv
+2025-08-08 18:59:13,160 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-08 18:59:13,160 - INFO - Reading normal_traffic_baseline.csv
+2025-08-08 18:59:13,193 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-08 18:59:13,193 - INFO - Reading synthetic_alerts.csv
+2025-08-08 18:59:13,203 - WARNING - Header of synthetic_alerts.csv does not match any table; skipping
+2025-08-08 18:59:13,203 - INFO - Reading synthetic_alerts2.csv
+2025-08-08 18:59:13,213 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-08 18:59:13,213 - INFO - Reading synthetic_host_stats.csv
+2025-08-08 18:59:13,243 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-08 18:59:13,243 - INFO - Reading synthetic_packets.csv
+2025-08-08 18:59:13,290 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-08 18:59:13,290 - INFO - Reading test.csv
+2025-08-08 18:59:13,301 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-08 18:59:13,301 - INFO - Reading users.csv
+2025-08-08 18:59:13,303 - ERROR - Insertion failed for users.csv \u2192 users: UNIQUE constraint failed: users.id
+2025-08-08 18:59:13,303 - INFO - CSV loader finished.
+2025-08-08 19:01:24,024 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-08 19:01:24,026 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-08 19:01:24,027 - INFO - Reading malicious_phish.csv
+2025-08-08 19:01:24,554 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-08 19:01:24,555 - INFO - Reading normal_traffic_baseline.csv
+2025-08-08 19:01:24,577 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-08 19:01:24,577 - INFO - Reading synthetic_alerts.csv
+2025-08-08 19:01:24,617 - INFO - Inserted 1000 rows into 'alerts' from synthetic_alerts.csv
+2025-08-08 19:01:24,617 - INFO - Reading synthetic_alerts2.csv
+2025-08-08 19:01:24,621 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-08 19:01:24,621 - INFO - Reading synthetic_host_stats.csv
+2025-08-08 19:01:24,640 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-08 19:01:24,640 - INFO - Reading synthetic_packets.csv
+2025-08-08 19:01:24,677 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-08 19:01:24,678 - INFO - Reading test.csv
+2025-08-08 19:01:24,679 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-08 19:01:24,679 - INFO - Reading users.csv
+2025-08-08 19:01:24,682 - ERROR - Insertion failed for users.csv \u2192 users: UNIQUE constraint failed: users.id
+2025-08-08 19:01:24,682 - INFO - CSV loader finished.
+2025-08-08 19:18:27,530 - INFO - CSV loader starting – directory: C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\data
+2025-08-08 19:18:27,531 - INFO - Connected to SQLite DB at C:\Users\zakar\Desktop\KOI\ICT729 Capstone Project 2\ImplementationScripts\ids\sqlite_db\net_analysis.db
+2025-08-08 19:18:27,532 - INFO - Reading malicious_phish.csv
+2025-08-08 19:18:28,179 - WARNING - Header of malicious_phish.csv does not match any table; skipping
+2025-08-08 19:18:28,180 - INFO - Reading normal_traffic_baseline.csv
+2025-08-08 19:18:28,214 - WARNING - Header of normal_traffic_baseline.csv does not match any table; skipping
+2025-08-08 19:18:28,214 - INFO - Reading synthetic_alerts.csv
+2025-08-08 19:18:28,269 - INFO - Inserted 1000 rows into 'alerts' from synthetic_alerts.csv
+2025-08-08 19:18:28,269 - INFO - Reading synthetic_alerts2.csv
+2025-08-08 19:18:28,281 - WARNING - Header of synthetic_alerts2.csv does not match any table; skipping
+2025-08-08 19:18:28,281 - INFO - Reading synthetic_host_stats.csv
+2025-08-08 19:18:28,307 - INFO - Inserted 240 rows into 'host_stats' from synthetic_host_stats.csv
+2025-08-08 19:18:28,308 - INFO - Reading synthetic_packets.csv
+2025-08-08 19:18:28,364 - INFO - Inserted 1000 rows into 'packets' from synthetic_packets.csv
+2025-08-08 19:18:28,364 - INFO - Reading test.csv
+2025-08-08 19:18:28,376 - WARNING - Header of test.csv does not match any table; skipping
+2025-08-08 19:18:28,376 - INFO - Reading users.csv
+2025-08-08 19:18:28,386 - ERROR - Insertion failed for users.csv \u2192 users: UNIQUE constraint failed: users.id
+2025-08-08 19:18:28,387 - INFO - CSV loader finished.

@@ -1,5 +1,5 @@
 -- Table 1: Raw packet logs
-CREATE TABLE packets (
+CREATE TABLE IF NOT EXISTS packets (
     packet_id    SERIAL PRIMARY KEY,
     ts    TIMESTAMP,             -- Packet capture timestamp
     src_ip       INET,                  -- Source IP address (IPv4/IPv6)
@@ -13,17 +13,18 @@ CREATE TABLE packets (
 );
 
 -- Table 2: Alerts for detected attacks
-CREATE TABLE alerts (
+CREATE TABLE IF NOT EXISTS alerts (
     alert_id     SERIAL PRIMARY KEY,
     ts    TIMESTAMP,            -- Time of detection
     alert_type   VARCHAR(50),          -- Type of alert ('DoS', 'DDoS', 'Port Scan', etc.)
     src_ip       INET,                 -- Source IP involved in attack (if applicable)
     dst_ip       INET,                 -- Target IP involved (if applicable)
-    details      TEXT                  -- Description or metadata (e.g., "SYN flood with X SYN packets in Y seconds")
+    details      TEXT,                 -- Description or metadata (e.g., "SYN flood with X SYN packets in Y seconds")
+	model_name   TEXT
 );
 
 -- Table 3: Host statistics per interval (e.g., per minute/hour)
-CREATE TABLE host_stats (
+CREATE TABLE IF NOT EXISTS host_stats (
     stats_id     SERIAL PRIMARY KEY,
     interval_start TIMESTAMP,         -- Start of time interval (e.g., 2025-03-28 12:00:00)
     interval_end   TIMESTAMP,         -- End of time interval
@@ -34,4 +35,20 @@ CREATE TABLE host_stats (
     unique_src_ips  INTEGER,          -- (if host is dest) number of unique source IPs seen
     unique_dst_ports INTEGER,         -- (if host is dest) number of unique destination ports targeted (useful for scan detection)
 	total_packets_size INTEGER
+);
+-- Table 4:
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER NOT NULL,					--Auto-incrementing primary key
+    username VARCHAR(64) NOT NULL,          --Unique user identifier
+    password_hash VARCHAR(128) NOT NULL,	--Hashed password storage
+    role VARCHAR(16) NOT NULL,				--Role assignment
+    
+    -- Constraints
+    CONSTRAINT users_pkey PRIMARY KEY (id),
+    CONSTRAINT users_username_key UNIQUE (username)
+);
+-- Table 5:
+CREATE TABLE IF NOT EXISTS malicious_ip
+(
+    ip_address text NOT NULL
 );

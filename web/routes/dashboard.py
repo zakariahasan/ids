@@ -1,159 +1,206 @@
-from flask import Blueprint, render_template, jsonify, current_app
-from sqlalchemy import text
+from __future__ import annotations
+
+import re
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List
+import codecs
+from flask import Blueprint, jsonify, render_template
+from sqlalchemy import text
+
 from ids.web.extensions import db
-bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
-QUERY_DIR = Path(__file__).resolve().parent.parent.parent / 'queries'
 
-def run_sql(file_name):
-    sql = (QUERY_DIR / file_name).read_text()
-    rows = db.session.execute(text(sql)).mappings()
-    return [dict(r) for r in rows]
+bp = Blueprint("dashboard", __name__, url_prefix="/api/dashboard")
 
-@bp.route('/')
+#   ids/
+#     ├─ queries/
+#     │   ├─ host_count.sql              ← Postgres default
+#     │   ├─ sqlite/host_count.sql       ← (optional) SQLite-specific override
+#     │   └─ …
+QUERY_DIR = Path(__file__).resolve().parent.parent.parent / "queries"
+
+
+# --------------------------------------------------------------------------- #
+# Helper: load & adapt SQL                                                    #
+# --------------------------------------------------------------------------- #
+POSTGRES_CAST_RE = re.compile(r"::\s*\w+")
+# 2025-08-08 05:28:01  or  2025-08-08 05:28:01.417
+DT_RE = re.compile(r"\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(?:\.\d+)?")
+
+def _adapt_sql_for_sqlite(sql: str) -> str:
+    """Best-effort convert a Postgres query into SQLite."""
+    # – remove '::type' casts -------------------------------------------------
+    sql = POSTGRES_CAST_RE.sub("", sql)
+
+    # – date_trunc('hour', ts) ➜ strftime('%Y-%m-%d %H:00:00', ts)
+    sql = re.sub(
+        r"date_trunc\s*\(\s*'(\w+)'\s*,\s*([^)]+)\)",
+        lambda m: (
+            f"strftime('%Y-%m-%d %H:00:00', {m.group(2)})"
+            if m.group(1) == "hour"
+            else f"strftime('%Y-%m-%d', {m.group(2)})"
+        ),
+        sql,
+        flags=re.IGNORECASE,
+    )
+
+    return sql
+
+
+def _load_sql(file_name: str) -> str:
+    """Return the SQL string appropriate for the current DB backend."""
+    dialect = db.get_engine().dialect.name  # 'postgresql', 'sqlite', …
+    if dialect == "sqlite":
+        alt = QUERY_DIR / "sqlite" / file_name
+        if alt.exists():
+            return alt.read_text(encoding="utf-8", errors="replace")
+
+        # Fallback: try to adapt the Postgres version automatically
+        return _adapt_sql_for_sqlite((QUERY_DIR / file_name).read_text())
+
+    # Postgres / others – use canonical query as-is
+    return (QUERY_DIR / file_name).read_text()
+
+
+# changed today
+
+def run_sql(filename: str):
+    sql  = _load_sql(filename)          # keeps the SQLite/Postgres switch
+    rows = db.session.execute(text(sql)).mappings().all()
+    # materialise as real dicts so routes can tweak them safely
+    return [_coerce_sqlite_types(dict(r)) for r in rows]
+
+# --------------------------------------------------------------------------- #
+# Helper: normalise SQLite return types                                       #
+# --------------------------------------------------------------------------- #
+def _coerce_sqlite_types(row: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert SQLite strings → datetime objects to match Postgres behaviour."""
+    for k, v in row.items():
+        if isinstance(v, str):
+            try:
+                row[k] = datetime.fromisoformat(v.replace(" ", "T"))
+            except ValueError:
+                # Py 3.10 needs .fromisoformat("YYYY-MM-DD HH:MM:SS.SSS")
+                #row[k] = datetime.strptime(v, "%Y-%m-%d %H:%M:%S.%f")
+                pass 
+    return row
+
+
+# --------------------------------------------------------------------------- #
+# Routes                                                                      #
+# --------------------------------------------------------------------------- #
+@bp.route("/")
 def view():
-    return render_template('dashboard.html')
+    return render_template("dashboard.html")
 
-@bp.route('/top_hosts')
+
+@bp.route("/top_hosts")
 def api_top_hosts():
-    return jsonify(run_sql('host_count.sql'))
+    return jsonify(run_sql("host_count.sql"))
+
 
 @bp.route("/alerts_by_hour")
 def alerts_by_hour():
-    rows = run_sql('alerts_by_hour.sql')
-    buckets = {}
+    rows = run_sql("alerts_by_hour.sql")
+    buckets: Dict[str, Dict[str, int]] = {}
     for row in rows:
-        hour = row["hour_bucket"].strftime("%Y-%m-%d %H:%M")
+        hour = (row["hour_bucket"].strftime("%Y-%m-%d %H:%M")
+        if hasattr(row["hour_bucket"], "strftime")
+        else datetime.fromisoformat(row["hour_bucket"]).strftime("%Y-%m-%d %H:%M"))
         buckets.setdefault(hour, {})[row["alert_type"]] = row["alert_cnt"]
     return jsonify(buckets)
 
+
 @bp.route("/top_sources")
 def top_sources():
-    return jsonify(run_sql('top_sources.sql'))
+    return jsonify(run_sql("top_sources.sql"))
+
 
 @bp.route("/ddos_last_10m")
 def ddos_last_10m():
-    rows = run_sql('ddos_last_10m.sql')
+    rows = run_sql("ddos_last_10m.sql")
     return jsonify([
-        {
-            "timestamp": r["ts"].isoformat(),
-            "count": r["ddos_window"],
-        } for r in rows
+        {                       # SQLite returns 'YYYY-MM-DD HH:MM:SS'
+            "timestamp": r["ts"],          # <- keep as-is
+            "count": int(r["ddos_window"])
+        }
+        for r in rows
     ])
+
 
 @bp.route("/scan_bursts")
 def scan_bursts():
-    rows = run_sql('scan_bursts.sql')
-    return jsonify([
+    rows = run_sql("scan_bursts.sql")        # already a list of dicts
+    payload = [
         {
-            "src_ip": r["src_ip"],
-            "burst_start": r["burst_start"].isoformat(),
-            "burst_end": r["burst_end"].isoformat(),
-            "scans": r["scans_in_burst"],
-        } for r in rows
-    ])
+            "src_ip":          r["src_ip"],
+            "burst_start":     r["burst_start"],   # ISO-8601 string from SQLite
+            "burst_end":       r["burst_end"],
+            "scans_in_burst":  int(r["scans_in_burst"]),
+        }
+        for r in rows
+    ]
+    return jsonify(payload)
+
+
 @bp.route("/top_bandwidth")
 def top_bandwidth():
-    """
-    Five hosts that moved the most bytes in the last 10 minutes.
-    Also returns packet counts so the UI can plot both.
-    """
     rows = run_sql("top_bandwidth_taker.sql")
-    # Make sure JSON is clean ints (SqlAlchemy may return Decimal)
-    for r in rows:
+    for r in rows:  # ensure JSON-friendly ints
         r["bytes_last_10m"] = int(r["bytes_last_10m"])
-        r["pkts_last_10m"]  = int(r["pkts_last_10m"])
+        r["pkts_last_10m"] = int(r["pkts_last_10m"])
     return jsonify(rows)
-    
-# ──────────────────────────────────────────────────────────────────────
-# NEW #2 – Average packet size per host (all-time)
-# ──────────────────────────────────────────────────────────────────────
+
+
 @bp.route("/avg_pkt_size")
 def avg_pkt_size():
-    """
-    Average packet size (bytes) and total packet count per host, lifetime.
-    Backed by avg_pkt_size_per_host.sql.
-    """
-    rows = run_sql("avg_pkt_size_per_host.sql")  # uses host_ip, avg_pkt_size_bytes, total_pkts
-    # Cast to JSON-friendly types
+    rows = run_sql("avg_pkt_size_per_host.sql")
     for r in rows:
         r["avg_pkt_size_bytes"] = float(r["avg_pkt_size_bytes"])
-        r["total_pkts"]         = int(r["total_pkts"])
+        r["total_pkts"] = int(r["total_pkts"])
     return jsonify(rows)
-    
-# ──────────────────────────────────────────────────────────────────────
-# NEW #3 – Hosts with heavy outgoing bias (last hour)
-# ──────────────────────────────────────────────────────────────────────
+
+
 @bp.route("/heavy_outgoing")
 def heavy_outgoing():
-    """
-    Hosts whose outgoing packets ≥ 2 × incoming in the past hour.
-    Returns in_pkts, out_pkts, and out_in_ratio.
-    """
-    rows = run_sql("host_with_heavy_outgoing.sql")  # :contentReference[oaicite:1]{index=1}
+    rows = run_sql("host_with_heavy_outgoing.sql")
     for r in rows:
-        r["in_pkts"]       = int(r["in_pkts"])
-        r["out_pkts"]      = int(r["out_pkts"])
-        r["out_in_ratio"]  = float(r["out_in_ratio"])
+        r["in_pkts"] = int(r["in_pkts"])
+        r["out_pkts"] = int(r["out_pkts"])
+        r["out_in_ratio"] = float(r["out_in_ratio"])
     return jsonify(rows)
-# ──────────────────────────────────────────────────────────────────────
-# NEW – Port fan-out check (unique dst ports, last 2 h)
-# ──────────────────────────────────────────────────────────────────────
+
+
 @bp.route("/port_fanout")
 def port_fanout():
-    """
-    Return up to 10 hosts that have contacted the widest range of dst ports
-    in the past two hours.
-    """
-    rows = run_sql("port_fan_out_check.sql")        # :contentReference[oaicite:1]{index=1}
-
-    # Aggregate per-host (SQL may return multiple intervals per host).
-    agg: dict[str, int] = {}
+    rows = run_sql("port_fan_out_check.sql")
+    agg: Dict[str, int] = {}
     for r in rows:
-        host = r["host_ip"]
-        ports = int(r["unique_dst_ports"])
-        agg[host] = max(ports, agg.get(host, 0))
-
+        agg[r["host_ip"]] = max(int(r["unique_dst_ports"]), agg.get(r["host_ip"], 0))
     top = sorted(agg.items(), key=lambda kv: kv[1], reverse=True)[:10]
     return jsonify([{"host_ip": h, "unique_dst_ports": p} for h, p in top])
-# ──────────────────────────────────────────────────────────────────────
-# NEW – new-source spike (possible DDoS precursor)
-# ──────────────────────────────────────────────────────────────────────
+
+
 @bp.route("/new_source_spike")
 def new_source_spike():
-    """
-    Returns every interval (past 12 h) where a host suddenly saw ≥10 new
-    source IPs compared with the previous interval.
-    """
     rows = run_sql("new_source_spike.sql")
+    return jsonify([
+        {
+            "host_ip": r["host_ip"],
+            "interval_start": r["interval_start"].isoformat(),
+            "unique_src_ips": int(r["unique_src_ips"]),
+            "prev_src_ips": int(r["prev_src_ips"]),
+            "new_src_jump": int(r["new_src_jump"]),
+        }
+        for r in rows
+    ])
 
-    # Force JSON-friendly types & ISO timestamp strings
-    cleaned = []
-    for r in rows:
-        cleaned.append({
-            "host_ip":          r["host_ip"],
-            "interval_start":   r["interval_start"].isoformat(),
-            "unique_src_ips":   int(r["unique_src_ips"]),
-            "prev_src_ips":     int(r["prev_src_ips"]),
-            "new_src_jump":     int(r["new_src_jump"]),
-        })
-    return jsonify(cleaned)
-# ──────────────────────────────────────────────────────────────────────
-# NEW – rolling 30-minute packet count (past 24 h)
-# ──────────────────────────────────────────────────────────────────────
-# ──────────────────────────────────────────────────────────────────────
-# NEW – total packets across all hosts per 30-min window (past 24 h)
-# ──────────────────────────────────────────────────────────────────────
+
 @bp.route("/rolling_pkt_30m_total")
 def rolling_pkt_30m_total():
     rows = run_sql("rolling_30_min_pkt_count.sql")
-
-    totals: dict[str, int] = {}
+    totals: Dict[str, int] = {}
     for r in rows:
-        ts = r["interval_end"].isoformat()
+        ts = r["interval_end"] 
         totals[ts] = totals.get(ts, 0) + int(r["pkts_last_30m"])
-
-    # sort chronologically
-    series = [{"interval_end": t, "total_pkts": totals[t]} 
-              for t in sorted(totals)]
-    return jsonify(series)
+    return jsonify([{"interval_end": t, "total_pkts": totals[t]} for t in sorted(totals)])

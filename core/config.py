@@ -21,6 +21,22 @@ ALERT_THROTTLE_SEC = int(os.getenv("IDS_ALERT_THROTTLE_SEC", "300"))
 
 # Database
 DB_DSN = os.getenv("IDS_DB_DSN", "dbname=net_analysis user=postgres password=postgres321 host=127.0.0.1")
+# Configurations (could be loaded from environment variables/YAML)
+postgres_config = {
+    "type": "postgres",
+    "host": "localhost",
+    "user": "postgres",
+    "password": "postgres321",
+    "dbname": "net_analysis"
+}
+
+sqlite_config = {
+    "type": "sqlite",
+    "db_path": str(BASE_DIR / "sqlite_db" / "net_analysis.db"),
+}
+
+#Environment
+ENVIRONMENT = "prod" #"test"  
 
 # ML
 MODEL_DIR = BASE_DIR / "ml_models"

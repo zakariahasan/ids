@@ -95,7 +95,7 @@ class AutoencoderModel(BaseAnomalyModel):
         ax.set_title("Autoencoder - Anomaly Detection (Training Data)")
         ax.legend()
 
-        outfile = save_dir / f"autoencoder_3d_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
+        outfile = save_dir / f"autoencoder_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
         fig.tight_layout()
         fig.savefig(outfile)
         plt.close(fig)

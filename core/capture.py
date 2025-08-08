@@ -1,14 +1,4 @@
-"""
-ids.core.capture
-================
-Sniffs packets with PyShark, writes raw rows into **packets**, updates
-per-host counters in memory, periodically flushes those statistics into
-**host_stats**, and feeds every packet to the DetectorEngine.
-
-* Non-IP frames are ignored gracefully.
-* Uses a lazy import for the DB singleton to avoid circular imports.
-"""
-
+"""ids.core.capture – packet sniffer & DB persister."""
 from __future__ import annotations
 
 import datetime as dt
@@ -24,38 +14,36 @@ from . import config
 from .detector import DetectorEngine, SynFloodDetector
 
 # --------------------------------------------------------------------------- #
-# Globals                                                                      #
+# Globals                                                                     #
 # --------------------------------------------------------------------------- #
 
 STATS_INTERVAL = 60  # seconds to aggregate before flush
 
 host_counters = defaultdict(
     lambda: {
-        "total": 0,       # packets total (in+out)
-        "in": 0,          # dst-side
-        "out": 0,         # src-side
-        "src_ips": set(),  # src IPs seen
-        "dst_ports": set(),  # ports hit
+        "total": 0,         # packets total (in+out)
+        "in": 0,            # dst‑side
+        "out": 0,           # src‑side
+        "src_ips": set(),   # src IPs seen
+        "dst_ports": set(), # ports hit
         "total_len": 0,
     }
 )
 last_stats_flush = time.time()
 
 # --------------------------------------------------------------------------- #
-# Helpers                                                                      #
+# Helpers                                                                     #
 # --------------------------------------------------------------------------- #
 
 
 def _lazy_db():
-    """Import `db` lazily to break circular-import during package init."""
-    return importlib.import_module("ids.core.db").db  # type: ignore[attr-defined]
+    """Import provider lazily to avoid circular import during package init."""
+    provider = importlib.import_module("ids.core.db_provider")
+    return provider.get_database_service()  # type: ignore[no-any-return]
 
 
 class PacketSniffer:
-    """
-    Capture packets, persist raw rows, update host stats, flush periodically,
-    and pass packets to the DetectorEngine.
-    """
+    """Capture packets, persist rows, update stats, and feed detectors."""
 
     def __init__(self, interface: str, detector: DetectorEngine):
         self.interface = interface
@@ -64,7 +52,7 @@ class PacketSniffer:
 
     # --------------------------- Packet helpers --------------------------- #
     def _extract_fields(self, packet) -> dict[str, Optional[str]]:
-        """Return minimal dict for DB insert. Tolerate non-IP frames."""
+        """Return minimal dict for DB insert. Tolerate non‑IP frames."""
         try:
             proto = packet.transport_layer or packet.highest_layer
         except AttributeError:
@@ -76,7 +64,7 @@ class PacketSniffer:
             src_ip = packet.ip.src  # type: ignore[attr-defined]
             dst_ip = packet.ip.dst  # type: ignore[attr-defined]
         except AttributeError:
-            pass  # Non-IP frame (ARP, etc.)
+            pass  # Non‑IP frame (ARP, etc.)
 
         src_port = dst_port = None
         if proto in ("TCP", "UDP"):
@@ -88,6 +76,34 @@ class PacketSniffer:
         length = int(getattr(packet, "length", 0) or 0)
         tcp_flags = getattr(getattr(packet, "tcp", None), "flags", None)
 
+        # ---------------------- full URL extraction ----------------------- #
+        full_url: Optional[str] = None
+        try:
+            # ---- Plain HTTP ------------------------------------------------
+            if hasattr(packet, "http"):
+                http = packet.http
+                host = getattr(http, "host", None)
+                uri = (
+                    getattr(http, "request_full_uri", None)
+                    or getattr(http, "request_uri", None)
+                )
+
+                if host and uri:
+                    # request_full_uri already has scheme if present
+                    full_url = uri if uri.startswith(("http://", "https://")) else f"http://{host}{uri}"
+                elif host:
+                    full_url = f"http://{host}"
+
+            # ---- HTTPS (SNI) ----------------------------------------------
+            elif hasattr(packet, "tls"):
+                sni = getattr(packet.tls, "handshake_extensions_server_name", None)
+                if sni:
+                    full_url = f"https://{sni}"
+        except AttributeError:
+            # Missing dissector attributes are ignored gracefully
+            pass
+
+        # ------------------------------------------------------------------ #
         return {
             "ts": packet.sniff_time.replace(tzinfo=None),
             "src_ip": src_ip,
@@ -97,6 +113,7 @@ class PacketSniffer:
             "protocol": proto,
             "length": length,
             "tcp_flags": str(tcp_flags) if tcp_flags else None,
+            "full_url": full_url,
         }
 
     def _persist_packet(self, fields: dict[str, Optional[str]]) -> None:
@@ -188,9 +205,9 @@ class PacketSniffer:
                 last_stats_flush = time.time()
 
 
-# ----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Convenience helper (used by scripts.run_ids)
-# ----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 def run_sniffer() -> None:  # pragma: no cover
     engine = DetectorEngine(detectors=[SynFloodDetector()])
     PacketSniffer(config.INTERFACE, engine).run()

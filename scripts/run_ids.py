@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Command‑line entry point for running the live IDS sniffer.
 
 *Windows‑friendly fix*: the previous version attempted to register POSIX
@@ -61,6 +60,8 @@ def main(argv: Sequence[str] | None = None) -> None:  # pragma: no cover
     args = _parse_args(argv)
 
     try:
+        print("[INFO] IDS runing..")
+
         _run(args.interface)
     except KeyboardInterrupt:
         print("[INFO] Ctrl‑C pressed — shutting down IDS.")

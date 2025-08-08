@@ -79,7 +79,7 @@ WHERE  prev_src_ips IS NOT NULL
 ORDER  BY new_src_jump DESC;
 
 
--- Rolling 30-minute packet total with window functions
+-- Rolling 30-minute packet total with window functions for past 24 hours
 -- Good for quick-trend dashboards without separate aggregation tables.
 SELECT
     host_ip,
@@ -89,9 +89,8 @@ SELECT
          ORDER BY interval_end
          RANGE BETWEEN INTERVAL '30 minutes' PRECEDING AND CURRENT ROW
     ) AS pkts_last_30m
-FROM   host_stats
+FROM   host_stats WHERE interval_end >= NOW() - INTERVAL '24 hour'
 ORDER  BY host_ip, interval_end;
-
 
 -- Hourly traffic heat-map base table
 -- Creates an on-the-fly hourly summary you can pivot in BI tools.

@@ -211,35 +211,6 @@
 
   <h1 class="mt-4">Alert Activity</h1>
 
-  <!-- ─────────────────── model selector ─────────────────── -->
-  <form method="post" class="row g-2 align-items-end mb-4">
-    <div class="col-auto">
-      <label class="form-label fw-bold">URL-based models</label>
-      <select name="model_choice" class="form-select">
-        {% for m in url_models %}
-          <option value="{{ m }}" {{ "selected" if m == current_model else "" }}>
-            {{ m }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-auto">
-      <label class="form-label fw-bold">Behaviour-based models</label>
-      <select name="model_choice" class="form-select">
-        {% for m in behaviour_models %}
-          <option value="{{ m }}" {{ "selected" if m == current_model else "" }}>
-            {{ m }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-auto">
-      <button type="submit" class="btn btn-primary">Switch model</button>
-    </div>
-  </form>
-
   <!-- ─── replace your current <table …> block with this ─── -->
 <div class="table-responsive">
   <table class="table-modern">

@@ -16,6 +16,10 @@ from .isolation_forest import IsolationForestModel
 from .autoencoder import AutoencoderModel
 from .one_class_svm import OneClassSVMModel
 from .base import BaseAnomalyModel
+from .base_classifier import BaseClassifierModel
+from .decision_tree_classifier import DecisionTreeURLModel
+from .random_forest_classifier import RandomForestURLModel
+from .svm_classifier import LinearSVMURLModel
 
 __all__: list[str] = [
     "ModelFactory",
@@ -23,9 +27,13 @@ __all__: list[str] = [
     "IsolationForestModel",
     "AutoencoderModel",
     "OneClassSVMModel",
+    "BaseClassifierModel",
+    "DecisionTreeURLModel",
+    "RandomForestURLModel",
+    "LinearSVMURLModel",
 ]
 
 
 def list_available_models() -> list[str]:
     """Return a list of model names recognised by :class:`ModelFactory`."""
-    return sorted(ModelFactory._models.keys())  # noqa: SLF001
+    return sorted(ModelFactory._models.keys())  

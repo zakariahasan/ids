@@ -1,9 +1,10 @@
-
 """
-ids.web.alerts  – updated fallback uses DatabaseClient._get_conn_cursor()
-avoiding direct access to `.conn`
+ids.web.alerts – DB-agnostic implementation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+✓ Works with Postgres *and* SQLite
+✓ Uses the shared DatabaseService  (ids.core.db_provider.get_database_service)
+✓ No direct cursor access – one abstraction point
 """
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,6 +20,7 @@ from flask import (
 )
 
 from ids.core import config
+from ids.core.db_provider import get_database_service
 
 bp = Blueprint("alerts", __name__, url_prefix="/alerts")
 
@@ -26,73 +28,26 @@ URL_MODELS = {"DecisionTree", "RandomForest", "LinearSVM"}
 BEHAV_MODELS = {"IsolationForest", "Autoencoder", "OneClassSVM"}
 MODEL_FILE = Path(config.BASE_DIR) / "current_model.txt"
 
-
 # ------------------------------------------------------------------ #
 # DB helpers                                                         #
 # ------------------------------------------------------------------ #
-def _lazy_db():
-    from importlib import import_module
-
-    return import_module("ids.core.db").db  # type: ignore[attr-defined]
-
-
-def _dictify(rows):
-    if not rows:
-        return []
-    if hasattr(rows[0], "keys"):
-        return [dict(r) for r in rows]
-    return [
-        dict(
-            alert_id=r[0],
-            ts=r[1],
-            alert_type=r[2],
-            src_ip=r[3],
-            dst_ip=r[4],
-            details=r[5],
-            model_name=r[6],
-        )
-        for r in rows
-    ]
-
-
 def _fetch_recent_alerts(limit: int = 10) -> List[dict[str, Any]]:
-    db = _lazy_db()
+    """Return the *limit* most-recent alerts as a list of dicts."""
+    db = get_database_service()
 
-    # Preferred helper
-    if hasattr(db, "fetch_alerts"):
-        return _dictify(db.fetch_alerts(limit))  # type: ignore[attr-defined]
-
-    # Generic query helper
-    if hasattr(db, "query"):
-        rows = db.query(
-            """SELECT alert_id, ts, alert_type, src_ip, dst_ip,
-                       details, model_name
-                  FROM alerts
-                  ORDER BY ts DESC
-                  LIMIT %s""",
-            (limit,),
-        )
-        return _dictify(rows)
-
-    # FINAL fallback – use the private _get_conn_cursor
-    if hasattr(db, "_get_conn_cursor"):
-        with db._get_conn_cursor() as (_conn, cur):  # type: ignore[attr-defined]
-            cur.execute(
-                """SELECT alert_id, ts, alert_type, src_ip, dst_ip,
-                           details, model_name
-                      FROM alerts
-                      ORDER BY ts DESC
-                      LIMIT %s""",
-                (limit,),
-            )
-            return _dictify(cur.fetchall())
-
-    # If we reach here, database layer is too restricted
-    return []
+    # The service already returns list[dict], so no post-processing needed
+    sql = (
+        "SELECT alert_id, ts, alert_type, src_ip, dst_ip, "
+        "details, model_name "
+        "FROM alerts "
+        "ORDER BY ts DESC "
+        f"LIMIT {int(limit)}"  # safe – limit is integer in our code path
+    )
+    return db.execute_query(sql)
 
 
 # ------------------------------------------------------------------ #
-# Helper for model selection
+# Helper for model selection                                         #
 # ------------------------------------------------------------------ #
 def _current_model() -> str:
     return MODEL_FILE.read_text().strip() if MODEL_FILE.exists() else "DecisionTree"
@@ -103,7 +58,7 @@ def _persist_model(choice: str) -> None:
 
 
 # ------------------------------------------------------------------ #
-# Route
+# Routes                                                              #
 # ------------------------------------------------------------------ #
 @bp.route("/", methods=["GET", "POST"])
 def alert_dashboard():

@@ -1,21 +1,11 @@
+"""Decision Tree URL classification model with Confusion‑Matrix and ROC–AUC plots.
 
-"""Decision Tree URL classification model (optimised for large datasets).
-
-Key changes
------------
-* **Feature cap**: TF‑IDF `max_features=50 000` to bound RAM and fit‑time.
-* **Regularised tree**: `max_depth=25`, `min_samples_leaf=5` – prevents huge trees.
-* **Timing logs**: prints training duration so you see progress.
-* **Unified MODEL_DIR**: sibling *models* directory, same as other models.
-* **Cleaner `.load()`**: avoids building a dummy pipeline.
-* **Held‑out metrics**: classification report is on the 30 % test split only.
-* **CLI**: `python decision_tree_classifier.py --csv path/to/data.csv`
-
-Columns expected in CSV: **url**, **type**
-"""  # noqa: E501
+Expected CSV columns: **url**, **type**
+"""
 
 from __future__ import annotations
 
+import datetime as dt
 import time
 from pathlib import Path
 from typing import Sequence
@@ -25,16 +15,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import ConfusionMatrixDisplay, classification_report, confusion_matrix
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    RocCurveDisplay,
+    auc,
+    classification_report,
+    confusion_matrix,
+    roc_curve,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import label_binarize
 from sklearn.tree import DecisionTreeClassifier
 
 # ----------------------------------------------------------------------
-# Local imports
+# Local imports / fallbacks
 # ----------------------------------------------------------------------
 try:
     from ids.core import config  # type: ignore
+
     MODEL_DIR = config.MODEL_DIR
 except Exception:
     MODEL_DIR = Path(__file__).resolve().parent / "models"
@@ -46,35 +45,44 @@ except ImportError:
     from .base_classifier import BaseClassifierModel  # type: ignore
 
 # ----------------------------------------------------------------------
+# Helper utilities
+# ----------------------------------------------------------------------
+
+def _plot_and_save(fig, save_dir: Path, name: str) -> Path:
+    """Save *fig* as *name*_<UTCtimestamp>.png inside *save_dir* and close the fig."""
+    save_dir.mkdir(parents=True, exist_ok=True)
+    png_path = save_dir / f"{name}_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
+    fig.savefig(png_path, dpi=150)
+    plt.close(fig)
+    print(f"[INFO] {name.replace('_', ' ').title()} saved to {png_path}")
+    return png_path
+
+# ----------------------------------------------------------------------
 # Model
 # ----------------------------------------------------------------------
 class DecisionTreeURLModel(BaseClassifierModel):
-    """Decision Tree based supervised URL classifier."""  # noqa: D401
+    """Decision‑Tree URL classifier with visual metrics export."""
 
     def __init__(self, **clf_kwargs):
         self.vectorizer = TfidfVectorizer(
             analyzer="char",
             ngram_range=(3, 5),
-            max_features=50_000,   # cap dimensionality
+            max_features=50_000,  # cap dimensionality
         )
         default_params = dict(max_depth=25, min_samples_leaf=5, random_state=42)
         default_params.update(clf_kwargs)
         self.classifier = DecisionTreeClassifier(**default_params)
         self._pipeline = Pipeline([
             ("vect", self.vectorizer),
-            ("clf",  self.classifier),
+            ("clf", self.classifier),
         ])
 
-    # ------------------------------------------------------------------
-    # Paths
-    # ------------------------------------------------------------------
+    # -------------------------- Properties --------------------------
     @property
     def model_path(self) -> Path:
         return MODEL_DIR / "decision_tree.pkl"
 
-    # ------------------------------------------------------------------
-    # API
-    # ------------------------------------------------------------------
+    # -------------------------- Core API ----------------------------
     def train(self, X: Sequence[str], y: Sequence[str]) -> None:
         tic = time.perf_counter()
         print("[INFO] Training started…", flush=True)
@@ -89,47 +97,94 @@ class DecisionTreeURLModel(BaseClassifierModel):
     def predict_proba(self, X: Sequence[str]):
         return self._pipeline.predict_proba(X)
 
-    def train_and_plot(self, X: Sequence[str], y: Sequence[str], *, save_dir: Path) -> Path:
-        save_dir.mkdir(parents=True, exist_ok=True)
-
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.3, stratify=y, random_state=42
-        )
-        self.train(X_train, y_train)
-        preds = self.predict(X_test)
-
-        cm = confusion_matrix(y_test, preds, labels=np.unique(y))
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=np.unique(y))
+    # -------------------- Private visual helpers --------------------
+    def _plot_confusion_matrix(self, y_true, y_pred, labels, save_dir: Path) -> Path:
+        cm = confusion_matrix(y_true, y_pred, labels=labels)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
         fig, ax = plt.subplots(figsize=(6, 5))
         disp.plot(ax=ax, cmap="Blues", colorbar=False)
         ax.set_title("Decision Tree – Confusion Matrix")
         plt.tight_layout()
+        return _plot_and_save(fig, save_dir, "decision_tree_confusion_matrix")
 
-        png_path = save_dir / "decision_tree_confusion_matrix.png"
-        fig.savefig(png_path, dpi=150)
-        plt.close(fig)
+    def _plot_roc_auc(self, y_true, probs, classes, save_dir: Path) -> Path:
+        """Plot ROC curves & compute AUC (binary or multi‑class)."""
+        fig, ax = plt.subplots(figsize=(6, 5))
 
+        # --------------------------- Binary ---------------------------
+        if len(classes) == 2:
+            positive_idx = list(classes).index(classes[1])  # index of the positive class
+            fpr, tpr, _ = roc_curve(y_true, probs[:, positive_idx], pos_label=classes[1])
+            roc_auc = auc(fpr, tpr)
+            RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc, estimator_name="Decision Tree").plot(ax=ax)
+            ax.set_title(f"ROC Curve (AUC = {roc_auc:.3f}) – Binary")
+
+        # ------------------------ Multi‑class -------------------------
+        else:
+            y_true_bin = label_binarize(y_true, classes=classes)
+            for idx, cls in enumerate(classes):
+                fpr, tpr, _ = roc_curve(y_true_bin[:, idx], probs[:, idx])
+                roc_auc = auc(fpr, tpr)
+                RocCurveDisplay(
+                    fpr=fpr,
+                    tpr=tpr,
+                    roc_auc=roc_auc,
+                    estimator_name=f"Class {cls}",
+                ).plot(ax=ax, lw=1, alpha=0.8)
+            # Micro‑average
+            fpr_micro, tpr_micro, _ = roc_curve(y_true_bin.ravel(), probs.ravel())
+            roc_auc_micro = auc(fpr_micro, tpr_micro)
+            RocCurveDisplay(
+                fpr=fpr_micro,
+                tpr=tpr_micro,
+                roc_auc=roc_auc_micro,
+                estimator_name="micro-avg",
+            ).plot(ax=ax, color="black", linestyle="--", lw=2)
+            ax.set_title("ROC Curves – Multi‑class (micro‑avg dashed)")
+
+        ax.grid(True, ls=":", lw=0.5)
+        plt.tight_layout()
+        return _plot_and_save(fig, save_dir, "decision_tree_roc_auc")
+
+    # -------------------- High‑level convenience --------------------
+    def train_and_plot(self, X: Sequence[str], y: Sequence[str], *, save_dir: Path) -> tuple[Path, Path]:
+        """Train‑test split, train model, export Confusion‑Matrix & ROC‑AUC plots."""
+        save_dir.mkdir(parents=True, exist_ok=True)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.3, stratify=y, random_state=42
+        )
+
+        # Train & predict
+        self.train(X_train, y_train)
+        preds = self.predict(X_test)
+        probs = self.predict_proba(X_test)
+
+        # Visuals
+        classes = np.unique(y)
+        cm_png = self._plot_confusion_matrix(y_test, preds, classes, save_dir)
+        roc_png = self._plot_roc_auc(y_test, probs, classes, save_dir)
+
+        # Text metrics
         print("\n[TEST‑SET METRICS]\n", classification_report(y_test, preds))
-        print(f"[INFO] Confusion matrix saved to {png_path}")
-        return png_path
+        return cm_png, roc_png
 
-    # ------------------------------------------------------------------
-    # Convenience
-    # ------------------------------------------------------------------
+    # ---------------------- Loader ------------------------
     @classmethod
     def load(cls):
         pipeline = joblib.load(MODEL_DIR / "decision_tree.pkl")
-        instance = cls.__new__(cls)        # type: ignore
+        instance = cls.__new__(cls)  # type: ignore
         instance._pipeline = pipeline
         return instance
 
 # ----------------------------------------------------------------------
-# CLI
+# CLI helper
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Train DecisionTree URL model")
+    parser = argparse.ArgumentParser(
+        description="Train Decision‑Tree URL model and export Confusion‑Matrix + ROC‑AUC plots"
+    )
     parser.add_argument(
         "--csv",
         type=str,
@@ -144,4 +199,6 @@ if __name__ == "__main__":
 
     df = pd.read_csv(csv_path)
     model = DecisionTreeURLModel()
-    model.train_and_plot(df["url"], df["type"], save_dir=csv_path.parent)
+    cm_png, roc_png = model.train_and_plot(df["url"], df["type"], save_dir= csv_path.parent.parent / "web" / "static" / "training_results" / "supervised"
+    )
+    print(f"\nSaved Confusion‑Matrix → {cm_png}\nSaved ROC‑AUC curve   → {roc_png}")

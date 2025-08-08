@@ -67,7 +67,9 @@
             <ul>
                 <li><a href="{{ url_for('home.index') }}">🏠 Home</a></li>
                 <li><a href="{{ url_for('dashboard.view') }}">📊 Analytics Dashboard</a></li>
-                <li><a href="{{ url_for('train.train_model') }}">🤖 Train AI Model</a></li>
+				<li><a href="{{ url_for('alerts.alert_dashboard') }}">🤖 Alert Dashboard </a></li>
+                <li><a href="{{ url_for('train_supervised.train_supervised_model') }}">🤖 Train Suppervised Model</a></li>
+				<li><a href="{{ url_for('train_unsupervised.train_unsupervised_model') }}">🤖 Train Unsuppervised Model</a></li>
 
                 {# show admin link only to admins #}
                 {% if g.user is not none and g.user.role == 'admin' %}

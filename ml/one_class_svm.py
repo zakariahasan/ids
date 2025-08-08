@@ -57,7 +57,7 @@ class OneClassSVMModel(BaseAnomalyModel):
         ax.set_title("One Class SVM - Anomaly Detection (Training Data)")
         ax.legend()
 
-        outfile = save_dir / f"one_class_svm_3d_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
+        outfile = save_dir / f"one_class_svm_{dt.datetime.utcnow():%Y%m%dT%H%M%S}.png"
         fig.tight_layout()
         fig.savefig(outfile)
         plt.close(fig)

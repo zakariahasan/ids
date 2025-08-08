@@ -19,5 +19,5 @@ SELECT
     (unique_src_ips - prev_src_ips) AS new_src_jump
 FROM   ranked
 WHERE  prev_src_ips IS NOT NULL
-  AND  unique_src_ips - prev_src_ips >= 10        -- spike threshold
+  AND  unique_src_ips - prev_src_ips >= 2        -- spike threshold
 ORDER  BY new_src_jump DESC;

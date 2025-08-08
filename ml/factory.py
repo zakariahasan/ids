@@ -1,6 +1,9 @@
 from .isolation_forest import IsolationForestModel
 from .autoencoder import AutoencoderModel
 from .one_class_svm import OneClassSVMModel
+from .decision_tree_classifier import DecisionTreeURLModel
+from .random_forest_classifier import RandomForestURLModel
+from .svm_classifier import LinearSVMURLModel
 
 class ModelFactory:
     """Factory to instantiate anomaly detection models by name."""
@@ -8,6 +11,9 @@ class ModelFactory:
         'IsolationForest': IsolationForestModel,
         'Autoencoder': AutoencoderModel,
         'OneClassSVM': OneClassSVMModel,
+        'DecisionTree':DecisionTreeURLModel,
+        'RandomForest':RandomForestURLModel,
+        'LinearSVM':LinearSVMURLModel,
     }
 
     @classmethod
